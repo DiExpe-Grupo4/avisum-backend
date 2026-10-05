@@ -15,8 +15,8 @@ public class CorsConfig {
                 registry.addMapping("/api/**")
                         .allowedOriginPatterns(
                                 "http://localhost:4200",
-                                "https://safebus-frontend.vercel.app",
-                                "https://safebus-frontend-*-carlosblancas969s-projects.vercel.app"
+                                "https://avisum-frontend-main.vercel.app",
+                                "https://avisum-frontend-main-*-carlosblancas969s-projects.vercel.app"
                         )
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
                         .allowedHeaders("*");
