@@ -8,7 +8,6 @@ import com.urbanGuard.safebus.monitoring.domain.model.commands.UpdateBusLocation
 import com.urbanGuard.safebus.monitoring.domain.model.queries.GetAllBusUnitsQuery;
 import com.urbanGuard.safebus.monitoring.domain.model.queries.GetBusUnitByIdQuery;
 import com.urbanGuard.safebus.monitoring.infrastructure.persistence.jpa.PassengerCountRepository;
-import com.urbanGuard.safebus.monitoring.infrastructure.persistence.jpa.ShiftRepository;
 import com.urbanGuard.safebus.monitoring.interfaces.rest.resources.BusUnitResource;
 import com.urbanGuard.safebus.monitoring.interfaces.rest.resources.CreateBusUnitResource;
 import com.urbanGuard.safebus.monitoring.interfaces.rest.resources.UpdateBusLocationResource;
@@ -32,31 +31,23 @@ public class BusUnitsController {
 
     private final BusUnitCommandService commandService;
     private final BusUnitQueryService queryService;
-    private final ShiftRepository shiftRepository;
     private final EmployeeRepository employeeRepository;
     private final PassengerCountRepository passengerCountRepository;
 
     public BusUnitsController(BusUnitCommandService commandService, BusUnitQueryService queryService,
-                              ShiftRepository shiftRepository, EmployeeRepository employeeRepository,
+                              EmployeeRepository employeeRepository,
                               PassengerCountRepository passengerCountRepository) {
         this.commandService = commandService;
         this.queryService = queryService;
-        this.shiftRepository = shiftRepository;
         this.employeeRepository = employeeRepository;
         this.passengerCountRepository = passengerCountRepository;
     }
 
     private BusUnitResource toEnrichedResource(BusUnit bus) {
-        Long assignedEmployeeId = null;
-        String assignedEmployeeName = null;
-
-        var activeShift = shiftRepository.findFirstByBusUnitIdAndStatus(bus.getId(), "ACTIVE");
-        if (activeShift.isPresent()) {
-            assignedEmployeeId = activeShift.get().getEmployeeId();
-            assignedEmployeeName = employeeRepository.findById(assignedEmployeeId)
-                    .map(e -> e.getFullName())
-                    .orElse(null);
-        }
+        Long assignedEmployeeId = bus.getAssignedEmployeeId();
+        String assignedEmployeeName = (assignedEmployeeId != null)
+                ? employeeRepository.findById(assignedEmployeeId).map(e -> e.getFullName()).orElse(null)
+                : null;
 
         Integer currentPassengerCount = passengerCountRepository.findFirstByBusUnitIdOrderByRecordedAtDesc(bus.getId())
                 .map(p -> p.getTotalAboard())

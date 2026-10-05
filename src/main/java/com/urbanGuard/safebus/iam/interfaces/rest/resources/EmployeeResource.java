@@ -1,2 +1,2 @@
 package com.urbanGuard.safebus.iam.interfaces.rest.resources;
-public record EmployeeResource(Long id, String employeeCode, String fullName, String email, String role) {}
+public record EmployeeResource(Long id, String employeeCode, String fullName, String email, String role, String dni, boolean active, boolean deleted) {}

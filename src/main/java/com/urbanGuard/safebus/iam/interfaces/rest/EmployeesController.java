@@ -2,15 +2,20 @@ package com.urbanGuard.safebus.iam.interfaces.rest;
 
 import com.urbanGuard.safebus.iam.application.commandservices.EmployeeCommandService;
 import com.urbanGuard.safebus.iam.application.queryservices.EmployeeQueryService;
+import com.urbanGuard.safebus.iam.domain.model.commands.DeactivateEmployeeCommand;
+import com.urbanGuard.safebus.iam.domain.model.commands.DeleteEmployeeCommand;
+import com.urbanGuard.safebus.iam.domain.model.commands.ReactivateEmployeeCommand;
 import com.urbanGuard.safebus.iam.domain.model.queries.GetAllEmployeesQuery;
 import com.urbanGuard.safebus.iam.domain.model.queries.GetEmployeeByCodeQuery;
 import com.urbanGuard.safebus.iam.domain.model.queries.GetEmployeeByIdQuery;
 import com.urbanGuard.safebus.iam.interfaces.rest.resources.CreateEmployeeResource;
 import com.urbanGuard.safebus.iam.interfaces.rest.resources.EmployeeResource;
 import com.urbanGuard.safebus.iam.interfaces.rest.resources.LoginResource;
+import com.urbanGuard.safebus.iam.interfaces.rest.resources.UpdateEmployeeResource;
 import com.urbanGuard.safebus.iam.interfaces.rest.transform.CreateEmployeeCommandFromResourceAssembler;
 import com.urbanGuard.safebus.iam.interfaces.rest.transform.EmployeeResourceFromEntityAssembler;
 import com.urbanGuard.safebus.iam.interfaces.rest.transform.LoginCommandFromResourceAssembler;
+import com.urbanGuard.safebus.iam.interfaces.rest.transform.UpdateEmployeeCommandFromResourceAssembler;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -45,6 +50,47 @@ public class EmployeesController {
         }
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(EmployeeResourceFromEntityAssembler.toResourceFromEntity(result.value()));
+    }
+
+    @Operation(summary = "Editar datos de un empleado")
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateEmployee(@PathVariable Long id, @Valid @RequestBody UpdateEmployeeResource resource) {
+        var result = employeeCommandService.handle(
+                UpdateEmployeeCommandFromResourceAssembler.toCommandFromResource(id, resource));
+        if (result.isErr()) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(result.error());
+        }
+        return ResponseEntity.ok(EmployeeResourceFromEntityAssembler.toResourceFromEntity(result.value()));
+    }
+
+    @Operation(summary = "Desactivar empleado (no puede iniciar sesión, no se borra)")
+    @PatchMapping("/{id}/deactivate")
+    public ResponseEntity<?> deactivateEmployee(@PathVariable Long id) {
+        var result = employeeCommandService.handle(new DeactivateEmployeeCommand(id));
+        if (result.isErr()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(result.error());
+        }
+        return ResponseEntity.ok(EmployeeResourceFromEntityAssembler.toResourceFromEntity(result.value()));
+    }
+
+    @Operation(summary = "Reactivar empleado desactivado")
+    @PatchMapping("/{id}/reactivate")
+    public ResponseEntity<?> reactivateEmployee(@PathVariable Long id) {
+        var result = employeeCommandService.handle(new ReactivateEmployeeCommand(id));
+        if (result.isErr()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(result.error());
+        }
+        return ResponseEntity.ok(EmployeeResourceFromEntityAssembler.toResourceFromEntity(result.value()));
+    }
+
+    @Operation(summary = "Eliminar empleado (soft delete, conserva historial de turnos)")
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteEmployee(@PathVariable Long id) {
+        var result = employeeCommandService.handle(new DeleteEmployeeCommand(id));
+        if (result.isErr()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(result.error());
+        }
+        return ResponseEntity.noContent().build();
     }
 
     @Operation(summary = "Login de empleado (valida password y aplica bloqueo por intentos fallidos)")

@@ -3,11 +3,9 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 
-public record CreateEmployeeResource(
-        String employeeCode,
+public record UpdateEmployeeResource(
         @NotBlank String fullName,
         @NotBlank @Email String email,
-        @NotBlank String password,
         @NotBlank String role,
         @NotBlank @Pattern(regexp = "\\d{8}", message = "El DNI debe tener 8 dígitos") String dni
 ) {}

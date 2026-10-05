@@ -18,7 +18,8 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
+import com.urbanGuard.safebus.monitoring.domain.model.commands.UpdateShiftProgressCommand;
+import com.urbanGuard.safebus.monitoring.interfaces.rest.resources.UpdateShiftProgressResource;
 import java.util.List;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -54,7 +55,15 @@ public class ShiftsController {
         if (result.isErr()) return ResponseEntity.status(HttpStatus.CONFLICT).body(result.error());
         return ResponseEntity.ok(ShiftResourceFromEntityAssembler.toResourceFromEntity(result.value()));
     }
-
+    @Operation(summary = "Actualizar el progreso de un turno activo (vista en vivo)")
+    @PatchMapping("/{id}/progress")
+    public ResponseEntity<?> updateProgress(@PathVariable Long id, @RequestBody UpdateShiftProgressResource resource) {
+        var command = new UpdateShiftProgressCommand(id, resource.distanceKm(), resource.durationSeconds(),
+                resource.passengerCount(), resource.fareCollected());
+        var result = commandService.handle(command);
+        if (result.isErr()) return ResponseEntity.status(HttpStatus.CONFLICT).body(result.error());
+        return ResponseEntity.ok(ShiftResourceFromEntityAssembler.toResourceFromEntity(result.value()));
+    }
     @Operation(summary = "Obtener todos los turnos")
     @GetMapping
     public ResponseEntity<List<ShiftResource>> getAllShifts() {

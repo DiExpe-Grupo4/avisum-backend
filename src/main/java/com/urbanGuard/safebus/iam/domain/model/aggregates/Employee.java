@@ -31,11 +31,20 @@ public class Employee {
     @Column(nullable = false, unique = true)
     private String email;
 
+    @Column(nullable = false, unique = true)
+    private String dni;
+
     @Column(nullable = false)
     private String password; // hash BCrypt, nunca texto plano
 
     @Column(nullable = false)
     private String role; // CONDUCTOR, ADMIN
+
+    @Column(nullable = false)
+    private boolean active = true;
+
+    @Column(nullable = false)
+    private boolean deleted = false;
 
     @Column(nullable = false)
     private int failedLoginAttempts = 0;
@@ -56,6 +65,7 @@ public class Employee {
         this.employeeCode = command.employeeCode();
         this.fullName = command.fullName();
         this.email = command.email();
+        this.dni = command.dni();
         this.password = command.password();
         this.role = command.role();
     }
@@ -74,5 +84,27 @@ public class Employee {
     public void resetFailedAttempts() {
         this.failedLoginAttempts = 0;
         this.lockedUntil = null;
+    }
+
+    /** false si está desactivado por el admin o eliminado (soft delete). */
+    public boolean canLogIn() {
+        return active && !deleted;
+    }
+
+    public void updateProfile(String fullName, String email, String dni, String role) {
+        this.fullName = fullName;
+        this.email = email;
+        this.dni = dni;
+        this.role = role;
+    }
+
+    public void deactivate() { this.active = false; }
+
+    public void reactivate() { this.active = true; }
+
+    /** Soft delete: no se borra la fila para no romper el historial de turnos. */
+    public void softDelete() {
+        this.deleted = true;
+        this.active = false;
     }
 }

@@ -3,6 +3,6 @@ import com.urbanGuard.safebus.monitoring.domain.model.commands.CreateBusUnitComm
 import com.urbanGuard.safebus.monitoring.interfaces.rest.resources.CreateBusUnitResource;
 public class CreateBusUnitCommandFromResourceAssembler {
     public static CreateBusUnitCommand toCommandFromResource(CreateBusUnitResource r) {
-        return new CreateBusUnitCommand(r.plateNumber(), r.route(), r.latitude(), r.longitude());
+        return new CreateBusUnitCommand(r.plateNumber(), r.route(), r.latitude(), r.longitude(), r.assignedEmployeeId());
     }
 }

@@ -23,6 +23,8 @@ public class BusUnit {
     private Double currentLatitude;
     private Double currentLongitude;
     private Double currentSpeed;
+    /** Conductor asignado de forma permanente a esta unidad (no depende de si tiene un turno activo). */
+    private Long assignedEmployeeId;
     @Column(nullable = false, updatable = false) @CreatedDate
     private Instant createdAt;
     @Column(nullable = false) @LastModifiedDate
@@ -35,10 +37,14 @@ public class BusUnit {
         this.status = "ACTIVE";
         this.currentLatitude = command.latitude();
         this.currentLongitude = command.longitude();
+        this.assignedEmployeeId = command.assignedEmployeeId();
     }
     public void updateLocation(Double lat, Double lon, Double speed) {
         this.currentLatitude = lat;
         this.currentLongitude = lon;
         if (speed != null) this.currentSpeed = speed;
+    }
+    public void assignTo(Long employeeId) {
+        this.assignedEmployeeId = employeeId;
     }
 }

@@ -6,6 +6,7 @@ import com.urbanGuard.safebus.monitoring.application.commandservices.ShiftComman
 import com.urbanGuard.safebus.monitoring.domain.model.aggregates.Shift;
 import com.urbanGuard.safebus.monitoring.domain.model.commands.EndShiftCommand;
 import com.urbanGuard.safebus.monitoring.domain.model.commands.StartShiftCommand;
+import com.urbanGuard.safebus.monitoring.domain.model.commands.UpdateShiftProgressCommand;
 import com.urbanGuard.safebus.monitoring.infrastructure.persistence.jpa.BusUnitRepository;
 import com.urbanGuard.safebus.monitoring.infrastructure.persistence.jpa.ShiftRepository;
 import com.urbanGuard.safebus.shared.application.result.Result;
@@ -55,6 +56,21 @@ public class ShiftCommandServiceImpl implements ShiftCommandService {
             return Result.err("El turno ya fue finalizado");
 
         shift.finish(command.distanceKm(), command.durationSeconds(), command.passengerCount(), command.fareCollected());
+        repo.save(shift);
+        return Result.ok(shift);
+    }
+
+    @Override
+    public Result<Shift, String> handle(UpdateShiftProgressCommand command) {
+        var shiftOpt = repo.findById(command.shiftId());
+        if (shiftOpt.isEmpty())
+            return Result.err("Turno no encontrado: " + command.shiftId());
+
+        var shift = shiftOpt.get();
+        if (!shift.isActive())
+            return Result.err("El turno ya fue finalizado");
+
+        shift.updateProgress(command.distanceKm(), command.durationSeconds(), command.passengerCount(), command.fareCollected());
         repo.save(shift);
         return Result.ok(shift);
     }

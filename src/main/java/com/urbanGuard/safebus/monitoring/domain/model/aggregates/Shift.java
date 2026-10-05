@@ -69,7 +69,14 @@ public class Shift {
         this.status = "FINISHED";
         this.endedAt = Instant.now();
     }
-
+    /** Actualiza las métricas de un turno que sigue ACTIVO, sin finalizarlo (para la vista en vivo). */
+    public void updateProgress(Double distanceKm, Long durationSeconds, Integer passengerCount, Double fareCollected) {
+        if (!isActive()) return;
+        this.distanceKm = distanceKm != null ? distanceKm : this.distanceKm;
+        this.durationSeconds = durationSeconds != null ? durationSeconds : this.durationSeconds;
+        this.passengerCount = passengerCount != null ? passengerCount : this.passengerCount;
+        this.fareCollected = fareCollected != null ? fareCollected : this.fareCollected;
+    }
     public boolean isActive() {
         return "ACTIVE".equals(this.status);
     }
