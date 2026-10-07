@@ -5,6 +5,7 @@ import com.urbanGuard.safebus.iam.domain.model.aggregates.Employee;
 import com.urbanGuard.safebus.iam.domain.model.commands.*;
 import com.urbanGuard.safebus.iam.infrastructure.persistence.jpa.EmployeeRepository;
 import com.urbanGuard.safebus.shared.application.result.Result;
+import com.urbanGuard.safebus.shared.infrastructure.email.EmailService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -13,10 +14,12 @@ public class EmployeeCommandServiceImpl implements EmployeeCommandService {
 
     private final EmployeeRepository employeeRepository;
     private final PasswordEncoder passwordEncoder;
+    private final EmailService emailService;
 
-    public EmployeeCommandServiceImpl(EmployeeRepository employeeRepository, PasswordEncoder passwordEncoder) {
+    public EmployeeCommandServiceImpl(EmployeeRepository employeeRepository, PasswordEncoder passwordEncoder, EmailService emailService) {
         this.employeeRepository = employeeRepository;
         this.passwordEncoder = passwordEncoder;
+        this.emailService = emailService;
     }
 
     @Override
@@ -49,6 +52,9 @@ public class EmployeeCommandServiceImpl implements EmployeeCommandService {
         );
         var employee = new Employee(hashedCommand);
         employeeRepository.save(employee);
+
+        emailService.sendWelcomeEmail(employee.getEmail(), employee.getFullName(), employee.getEmployeeCode());
+
         return Result.ok(employee);
     }
 
