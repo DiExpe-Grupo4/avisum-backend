@@ -38,7 +38,7 @@ public class EmailService {
                     "Hola " + fullName + ",\n\n" +
                     "Bienvenido a Avisum.\n" +
                     "Tu código de acceso es: " + employeeCode + "\n\n" +
-                    "Ingresa a la plataforma con este código para iniciar tu turno.\n\n" +
+                    "Ingresa a este enlace para iniciar tu turno: https://avisum-frontend-main.vercel.app/conductor/login\n\n" +
                     "Equipo Avisum"
             );
 
